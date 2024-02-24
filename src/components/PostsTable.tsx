@@ -120,6 +120,9 @@ const PostsTable = () => {
           <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
             <tr>
               <th scope="col" className="px-6 py-3">
+                Id
+              </th>
+              <th scope="col" className="px-6 py-3">
                 Post name
               </th>
               <th scope="col" className="px-6 py-3">
@@ -136,12 +139,18 @@ const PostsTable = () => {
                 key={index}
                 className="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
               >
-                <th
+                <td
+                  scope="row"
+                  className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                >
+                  {index + 1}
+                </td>
+                <td
                   scope="row"
                   className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
                 >
                   {post.name}
-                </th>
+                </td>
                 <td className="px-6 py-4">
                   <img
                     src={post.image ? URL.createObjectURL(post.image) : ""}
