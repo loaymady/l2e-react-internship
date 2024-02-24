@@ -11,6 +11,12 @@ const PostsTable = () => {
   const [isOpenAddModal, setIsOpenAddModal] = useState(false);
   const [isOpenConfirmModal, setIsOpenConfirmModal] = useState(false);
   const [postIdClicked, setPostIdClicked] = useState("");
+  const [isOpenEditModal, setIsOpenEditModal] = useState(false);
+  const [postToEdit, setPostToEdit] = useState<Post>({
+    id: "",
+    name: "",
+    image: null,
+  });
 
   /** --------- CREATING --------- */
   const onOpenAddModal = () => {
@@ -39,13 +45,6 @@ const PostsTable = () => {
     validationSchema: validationSchema,
   });
 
-  const handleImageChange = (
-    formik: FormikProps<FormValues>,
-    e: ChangeEvent<HTMLInputElement>
-  ) => {
-    const file = e.target.files && e.target.files[0];
-    formik.setFieldValue("image", file || null);
-  };
   /**\\ --------- CREATING --------- \\*/
 
   /** --------- DELETING --------- */
@@ -68,6 +67,48 @@ const PostsTable = () => {
     setPostIdClicked("");
   };
   /**\\ --------- DELETING --------- \\*/
+
+  /** --------- EDITING --------- */
+  const onOpenEditModal = (post: Post) => {
+    setIsOpenEditModal(true);
+    setPostToEdit(post);
+  };
+
+  const onCloseEditModal = () => {
+    setIsOpenEditModal(false);
+  };
+
+  const formikEdit = useFormik<FormValues>({
+    initialValues: {
+      name: postToEdit.name,
+      image: postToEdit.image,
+    },
+    enableReinitialize: true,
+    onSubmit: (values) => {
+      const index = posts.findIndex((post) => post.id === postToEdit.id);
+      if (index !== -1) {
+        const updatedPosts = [...posts];
+        updatedPosts[index] = {
+          id: postToEdit.id,
+          name: values.name,
+          image: values.image,
+        };
+        setPosts(updatedPosts);
+      }
+      onCloseEditModal();
+    },
+    validationSchema: validationSchema,
+  });
+  /**\\ --------- EDITING --------- \\*/
+
+  //Handle Image
+  const handleImageChange = (
+    formik: FormikProps<FormValues>,
+    e: ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = e.target.files && e.target.files[0];
+    formik.setFieldValue("image", file || null);
+  };
 
   return (
     <>
@@ -109,7 +150,12 @@ const PostsTable = () => {
                   />
                 </td>
                 <td className="flex space-x-2 px-6 py-4">
-                  <Button className=" px-4 py-2">Edit</Button>
+                  <Button
+                    className=" px-4 py-2"
+                    onClick={() => onOpenEditModal(post)}
+                  >
+                    Edit
+                  </Button>
                   <Button
                     variant={"danger"}
                     size={"sm"}
@@ -176,6 +222,40 @@ const PostsTable = () => {
               variant={"cancel"}
               onClick={onCloseConfirmModal}
             >
+              Cancel
+            </Button>
+          </div>
+        </form>
+      </Modal>
+      <Modal
+        isOpen={isOpenEditModal}
+        closeModal={onCloseEditModal}
+        title="Edit your Post"
+      >
+        <form className="space-y-3" onSubmit={formikEdit.handleSubmit}>
+          <input
+            type="text"
+            className="border-[1px] border-gray-300 shadow-lg focus:border-indigo-600 focus:outline-none focus:ring-1 focus:ring-indigo-600 rounded-lg px-3 py-3 text-md w-full bg-transparent"
+            name="name"
+            onChange={formikEdit.handleChange}
+            value={formikEdit.values.name}
+          />
+          {formikEdit.touched.name && formikEdit.errors.name ? (
+            <p style={{ color: "red" }}>{formikEdit.errors.name}</p>
+          ) : null}
+          <input
+            type="file"
+            className="border-[1px] border-gray-300 shadow-lg  rounded-lg px-3 py-3 text-md w-full bg-transparent"
+            name="image"
+            accept="image/*"
+            onChange={(e) => handleImageChange(formikEdit, e)}
+          />
+          {formikEdit.touched.image && formikEdit.errors.image ? (
+            <p style={{ color: "red" }}>{formikEdit.errors.image}</p>
+          ) : null}
+          <div className="flex items-center space-x-2 mt-6">
+            <Button>Update</Button>
+            <Button type="button" variant={"cancel"} onClick={onCloseEditModal}>
               Cancel
             </Button>
           </div>
