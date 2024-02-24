@@ -1,4 +1,4 @@
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, FormEvent, useState } from "react";
 import Button from "./ui/Button";
 import { FormValues, Post } from "../interface";
 import { FormikProps, useFormik } from "formik";
@@ -9,6 +9,8 @@ import Modal from "./ui/Modal";
 const PostsTable = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [isOpenAddModal, setIsOpenAddModal] = useState(false);
+  const [isOpenConfirmModal, setIsOpenConfirmModal] = useState(false);
+  const [postIdClicked, setPostIdClicked] = useState("");
 
   /** --------- CREATING --------- */
   const onOpenAddModal = () => {
@@ -45,6 +47,27 @@ const PostsTable = () => {
     formik.setFieldValue("image", file || null);
   };
   /**\\ --------- CREATING --------- \\*/
+
+  /** --------- DELETING --------- */
+  const onOpenConfirmModal = (id: string) => {
+    setIsOpenConfirmModal(true);
+    setPostIdClicked(id);
+  };
+
+  const handleSubmitDelete = (e: FormEvent) => {
+    e.preventDefault();
+    const index = posts.findIndex((post) => post.id === postIdClicked);
+    if (index !== -1) {
+      setPosts([...posts.slice(0, index), ...posts.slice(index + 1)]);
+    }
+    onCloseConfirmModal();
+  };
+
+  const onCloseConfirmModal = () => {
+    setIsOpenConfirmModal(false);
+    setPostIdClicked("");
+  };
+  /**\\ --------- DELETING --------- \\*/
 
   return (
     <>
@@ -87,7 +110,11 @@ const PostsTable = () => {
                 </td>
                 <td className="flex space-x-2 px-6 py-4">
                   <Button className=" px-4 py-2">Edit</Button>
-                  <Button variant={"danger"} size={"sm"}>
+                  <Button
+                    variant={"danger"}
+                    size={"sm"}
+                    onClick={() => onOpenConfirmModal(post.id)}
+                  >
                     Remove
                   </Button>
                 </td>
@@ -129,6 +156,26 @@ const PostsTable = () => {
               Add
             </Button>
             <Button type="button" variant={"cancel"} onClick={onCloseAddModal}>
+              Cancel
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      <Modal
+        isOpen={isOpenConfirmModal}
+        closeModal={onCloseConfirmModal}
+        title="Are you sure you want to remove this Post from your Store?"
+        description="Deleting this Post will remove it permanently from your dataset. Please make sure this is the intended action."
+      >
+        <form className="space-y-3" onSubmit={handleSubmitDelete}>
+          <div className="flex items-center space-x-2 mt-6">
+            <Button variant={"danger"}>Yes, remove</Button>
+            <Button
+              type="button"
+              variant={"cancel"}
+              onClick={onCloseConfirmModal}
+            >
               Cancel
             </Button>
           </div>
