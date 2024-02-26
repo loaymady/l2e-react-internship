@@ -1,5 +1,6 @@
+/* eslint-disable react-refresh/only-export-components */
 import { VariantProps, cva } from "class-variance-authority";
-import { HTMLAttributes, ReactNode } from "react";
+import { HTMLAttributes, ReactNode, memo } from "react";
 import { cn } from "../../utils/functions";
 
 const buttonVariants = cva(
@@ -83,4 +84,4 @@ const Button = ({
   );
 };
 
-export default Button;
+export default memo(Button);

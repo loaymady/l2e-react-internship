@@ -1,5 +1,6 @@
+/* eslint-disable react-refresh/only-export-components */
 import { Dialog, Transition } from "@headlessui/react";
-import { Fragment, ReactNode } from "react";
+import { Fragment, ReactNode, memo } from "react";
 
 interface IProps {
   title?: string;
@@ -73,4 +74,4 @@ const Modal = ({
   );
 };
 
-export default Modal;
+export default memo(Modal);

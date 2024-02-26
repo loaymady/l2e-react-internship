@@ -1,31 +1,31 @@
-import { ChangeEvent, FormEvent, useState } from "react";
+/* eslint-disable react-hooks/exhaustive-deps */
+import { ChangeEvent, FormEvent, useCallback, useState } from "react";
 import Button from "./ui/Button";
-import { FormValues, Post } from "../interface";
+import { FormValues, IPost } from "../interface";
 import { FormikProps, useFormik } from "formik";
 import { v4 as uuidv4 } from "uuid";
 import { validationSchema } from "../validation";
+import Post from "./Post";
 import Modal from "./ui/Modal";
 
 const PostsTable = () => {
-  const [posts, setPosts] = useState<Post[]>([]);
+  const [posts, setPosts] = useState<IPost[]>([]);
   const [isOpenAddModal, setIsOpenAddModal] = useState(false);
   const [isOpenConfirmModal, setIsOpenConfirmModal] = useState(false);
   const [postIdClicked, setPostIdClicked] = useState("");
   const [isOpenEditModal, setIsOpenEditModal] = useState(false);
-  const [postToEdit, setPostToEdit] = useState<Post>({
+  const [postToEdit, setPostToEdit] = useState<IPost>({
     id: "",
     name: "",
     image: null,
   });
 
   /** --------- CREATING --------- */
-  const onOpenAddModal = () => {
-    setIsOpenAddModal(true);
-  };
-  const onCloseAddModal = () => {
+  const onOpenAddModal = useCallback(() => setIsOpenAddModal(true), []);
+  const onCloseAddModal = useCallback(() => {
     setIsOpenAddModal(false);
     formikCreate.resetForm();
-  };
+  }, []);
 
   const formikCreate = useFormik<FormValues>({
     initialValues: {
@@ -33,7 +33,7 @@ const PostsTable = () => {
       image: null,
     },
     onSubmit: (values) => {
-      const newPost: Post = {
+      const newPost: IPost = {
         id: uuidv4(),
         name: values.name,
         image: values.image,
@@ -48,10 +48,7 @@ const PostsTable = () => {
   /**\\ --------- CREATING --------- \\*/
 
   /** --------- DELETING --------- */
-  const onOpenConfirmModal = (id: string) => {
-    setIsOpenConfirmModal(true);
-    setPostIdClicked(id);
-  };
+  const onOpenConfirmModal = useCallback(() => setIsOpenConfirmModal(true), []);
 
   const handleSubmitDelete = (e: FormEvent) => {
     e.preventDefault();
@@ -66,17 +63,12 @@ const PostsTable = () => {
     setIsOpenConfirmModal(false);
     setPostIdClicked("");
   };
+
   /**\\ --------- DELETING --------- \\*/
 
   /** --------- EDITING --------- */
-  const onOpenEditModal = (post: Post) => {
-    setIsOpenEditModal(true);
-    setPostToEdit(post);
-  };
-
-  const onCloseEditModal = () => {
-    setIsOpenEditModal(false);
-  };
+  const onOpenEditModal = useCallback(() => setIsOpenEditModal(true), []);
+  const onCloseEditModal = useCallback(() => setIsOpenEditModal(false), []);
 
   const formikEdit = useFormik<FormValues>({
     initialValues: {
@@ -135,50 +127,19 @@ const PostsTable = () => {
           </thead>
           <tbody>
             {posts.map((post, index) => (
-              <tr
+              <Post
                 key={index}
-                className="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
-              >
-                <td
-                  scope="row"
-                  className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-                >
-                  {index + 1}
-                </td>
-                <td
-                  scope="row"
-                  className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-                >
-                  {post.name}
-                </td>
-                <td className="px-6 py-4">
-                  <img
-                    src={post.image ? URL.createObjectURL(post.image) : ""}
-                    alt={post.name}
-                    className="rounded-full h-10 w-10 object-cover"
-                  />
-                </td>
-                <td className="flex space-x-2 px-6 py-4">
-                  <Button
-                    className=" px-4 py-2"
-                    onClick={() => onOpenEditModal(post)}
-                  >
-                    Edit
-                  </Button>
-                  <Button
-                    variant={"danger"}
-                    size={"sm"}
-                    onClick={() => onOpenConfirmModal(post.id)}
-                  >
-                    Remove
-                  </Button>
-                </td>
-              </tr>
+                post={post}
+                index={index}
+                onOpenEditModal={onOpenEditModal}
+                onOpenConfirmModal={onOpenConfirmModal}
+                setPostToEdit={setPostToEdit}
+                setPostIdClicked={setPostIdClicked}
+              />
             ))}
           </tbody>
         </table>
       </div>
-
       <Modal
         isOpen={isOpenAddModal}
         closeModal={onCloseAddModal}
@@ -190,6 +151,7 @@ const PostsTable = () => {
             name="name"
             className="border-[1px] border-gray-300 shadow-lg focus:border-indigo-600 focus:outline-none focus:ring-1 focus:ring-indigo-600 rounded-lg px-3 py-3 text-md w-full bg-transparent"
             placeholder="Post Name"
+            autoComplete="off"
             onChange={formikCreate.handleChange}
             value={formikCreate.values.name}
           />
@@ -236,6 +198,7 @@ const PostsTable = () => {
           </div>
         </form>
       </Modal>
+
       <Modal
         isOpen={isOpenEditModal}
         closeModal={onCloseEditModal}
@@ -246,6 +209,7 @@ const PostsTable = () => {
             type="text"
             className="border-[1px] border-gray-300 shadow-lg focus:border-indigo-600 focus:outline-none focus:ring-1 focus:ring-indigo-600 rounded-lg px-3 py-3 text-md w-full bg-transparent"
             name="name"
+            autoComplete="off"
             onChange={formikEdit.handleChange}
             value={formikEdit.values.name}
           />
